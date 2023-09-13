@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <canvas id = "mycanvas" width="900" height="900" style="border: 2px solid black;"></canvas>
+    <script>
+        var canvas = document.getElementById("mycanvas");
+        var ctx = canvas.getContext('2d');
+        var image = new Image();
+        // 원래 그림의 넓이 및 높이 / gridsize
+        var sw;
+        var sh;
+        // 그림이 그려질 캔버스의 넢이 및 높이
+        var dw;
+        var dh;
+
+        var puzzles = []
+        image.src = "../image/벛꽃.jpg";
+        image.onload = function(){
+            // ctx.drawImage(image,0,0,image.width,image.height,200,200,500,500);
+            splitImageIntoGrid(image, 5);
+        }
+
+
+    // 이미지를 5x5 그리드로 분할하여 각각의 Canvas에 표시
+    function splitImageIntoGrid(img, gridSize) {
+        sw = image.width / gridSize
+        sh = image.height / gridSize
+        dw = canvas.width / gridSize
+        dh = canvas.height / gridSize
+        // 이미지를 분할하여 각 Canvas에 표시
+        for (let row = 0; row < gridSize; row++) {
+            // console.log(1)
+            for (let col = 0; col < gridSize; col++) {                
+                const sx = col * sw;
+                const sy = row * sh;
+                puzzles.push({
+                    sx : col * sw,
+                    sy : row * sh
+                });                
+            }
+        }
+        var i =0;
+        for (var row = 0; row < gridSize; row++) {
+            for(var col = 0; col < gridSize; col++){
+                ctx.drawImage(img, puzzles[i].sx, puzzles[i].sy, sw, sh, dw*col,dh*row, dw, dh);
+                i++;                
+            }         
+            }
+
+    }
+    </script>
+</body>
+</html>
