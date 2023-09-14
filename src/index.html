@@ -6,7 +6,9 @@
     <title>Document</title>
 </head>
 <body>
-    <canvas id = "mycanvas" width="900" height="900" style="border: 2px solid black;"></canvas>
+    <div style="text-align: center; ">
+        <canvas id = "mycanvas" width="1260" height="1260" style="border: 2px solid black;"></canvas>
+    </div>
     <script>
         var canvas = document.getElementById("mycanvas");
         var ctx = canvas.getContext('2d');
@@ -15,27 +17,34 @@
         var sw;
         var sh;
         // 그림이 그려질 캔버스의 넢이 및 높이
-        var dw;
-        var dh;
-
+        var dw = 180;
+        var dh = 180;
+        // 그림이 처음에 배치 될 위치들
+        var pictureCurrentPosition = [];
         var puzzles = []
+        var pictureStartPosition = [];
+
+        for(var i = 1; i<6;i++){
+            for(var j = 1; j<6; j++){
+                pictureCurrentPosition.push([180*j,180*i])
+            }
+        }
+
         image.src = "../image/벛꽃.jpg";
         image.onload = function(){
             // ctx.drawImage(image,0,0,image.width,image.height,200,200,500,500);
-            splitImageIntoGrid(image, 5);
+            splitImageIntoGrid(image);
         }
 
 
     // 이미지를 5x5 그리드로 분할하여 각각의 Canvas에 표시
-    function splitImageIntoGrid(img, gridSize) {
-        sw = image.width / gridSize
-        sh = image.height / gridSize
-        dw = canvas.width / gridSize
-        dh = canvas.height / gridSize
+    function splitImageIntoGrid(img) {
+        sw = image.width / 5
+        sh = image.height / 5
         // 이미지를 분할하여 각 Canvas에 표시
-        for (let row = 0; row < gridSize; row++) {
+        for (let row = 0; row < 5; row++) {
             // console.log(1)
-            for (let col = 0; col < gridSize; col++) {                
+            for (let col = 0; col < 5; col++) {                
                 const sx = col * sw;
                 const sy = row * sh;
                 puzzles.push({
@@ -44,14 +53,54 @@
                 });                
             }
         }
+        // 초반에 그려주기
         var i =0;
-        for (var row = 0; row < gridSize; row++) {
-            for(var col = 0; col < gridSize; col++){
-                ctx.drawImage(img, puzzles[i].sx, puzzles[i].sy, sw, sh, dw*col,dh*row, dw, dh);
+        for (var row = 0; row < 5; row++) {
+            for(var col = 0; col < 5; col++){
+                ctx.drawImage(img, puzzles[i].sx, puzzles[i].sy, sw, sh, pictureCurrentPosition[i][0],pictureCurrentPosition[i][1], dw, dh);
                 i++;                
             }         
             }
+        start()
+    }
 
+    // 옆 공간에 배치 하기
+    // function puzzlePositioning(){
+    //     for(var i =0; i< 25; i++){
+
+    //     }
+    // }
+
+    function setStartPosition(){
+        for(var i = 0; i<8; i++){
+            pictureStartPosition.push([180*i,0]);
+        }
+        for(var i = 1; i<8; i++){
+            pictureStartPosition.push([1260,180*i]);
+        }
+        for(var i = 0; i<7; i++){
+            pictureStartPosition.push([180*i,1260]);
+        }
+        for(var i = 1; i<6; i++){
+            pictureStartPosition.push([0,180*i]);
+        }
+        console.log(pictureStartPosition);
+    }
+
+    function start(){
+        drawGrid();        
+        setStartPosition();
+    }
+
+    // 퍼즐 격판 그리기
+    function drawGrid(){
+        for(var i = 1; i<7; i++){
+            ctx.moveTo(180,180*i);
+            ctx.lineTo(1080,180*i);
+            ctx.moveTo(180*i,180);
+            ctx.lineTo(180*i,1080);
+        }
+        ctx.stroke();
     }
     </script>
 </body>
