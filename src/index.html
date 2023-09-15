@@ -6,41 +6,216 @@
     <title>Document</title>
 </head>
 <body>
+    <audio id = "backgroundMusic" src = "../audio/WhiteChristmas.mp3"></audio>
+    <audio id = "effectMusic"></audio>
     <div style="text-align: center; ">
-        <canvas id = "mycanvas" width="1260" height="1260" style="border: 2px solid black;"></canvas>
+        <div>        
+            <label for = "difficulty">난이도</label>
+            <select name="difficulty" id="difficulty">
+                <option value="nomal">nomal</option>
+                <option value="hard">hard</option>
+                <option value="veryhard">veryhard</option>
+            </select>
+            <button onclick="startGame()">start</button>            
+        </div>
+        <canvas id = "mycanvas" width="700" height="700" style="border: 2px solid black;"></canvas>
+        <div id="time"></div>
     </div>
     <script>
-        var canvas = document.getElementById("mycanvas");
-        var ctx = canvas.getContext('2d');
-        var image = new Image();
+        let canvas = document.getElementById("mycanvas");
+        let ctx = canvas.getContext('2d');
+        ctx.lineWidth = 5;
+        let image = new Image();
         // 원래 그림의 넓이 및 높이 / gridsize
-        var sw;
-        var sh;
+        let sw;
+        let sh;
         // 그림이 그려질 캔버스의 넢이 및 높이
-        var dw = 180;
-        var dh = 180;
+        let dw = 100;
+        let dh = 100;
         // 그림이 처음에 배치 될 위치들
-        var pictureCurrentPosition = [];
-        var puzzles = []
-        var pictureStartPosition = [];
+        let pictureCurrentPosition = [];
+        let puzzles = []
+        let pictureStartPosition = [];
+        let puzzleGamePosition = []
+        // 선택한 그림
+        let choicePicture;
+        let isMouseDown = false;
+        // 이전 x,y 좌표
+        let previousX = null;
+        let previousY = null;
+        let rightNum = 0;
+        // 이미지 저장 경로
+        let nomalImagePath = ["../image_nomal/잠만보.jpg","../image_nomal/피크닉.jpg"];
+        let hardImagePath = ["../image_hard/벛꽃.jpg","../image_hard/비.jpg"];
+        let veryhardImagePath = ["../image_veryhard/바다.jpg","../image_veryhard/우주.jpg"];
+        //
+        const backgroudMusic = document.getElementById("backgroundMusic");
+        const effectMusic = document.getElementById("effectMusic");
 
-        for(var i = 1; i<6;i++){
-            for(var j = 1; j<6; j++){
-                pictureCurrentPosition.push([180*j,180*i])
+    
+        // 게임 시작
+        function startGame(){
+            getImage(document.getElementById("difficulty").value);
+            image.onload = function(){
+            start();
+            }
+        }
+        // 랜덤으로 image 뽑기
+        function getImage(difficulty){            
+            let imageIndex = Math.floor(Math.random() * 2);
+            switch(difficulty){
+                case "nomal":
+                    image.src = nomalImagePath[imageIndex];  
+                    break;
+                case "haed":
+                    image.src = hardImagePath[imageIndex];
+                    break;
+                case "veryhard":
+                    image.src = veryhardImagePath[imageIndex];
+                    break;
             }
         }
 
-        image.src = "../image/벛꽃.jpg";
-        image.onload = function(){
-            // ctx.drawImage(image,0,0,image.width,image.height,200,200,500,500);
-            splitImageIntoGrid(image);
+        // 이벤트 리스너
+        function addCanvasEventListener(){
+            canvas.addEventListener("mousedown",pickupPicture);
+            canvas.addEventListener("mouseup",dropPicture);
+            canvas.addEventListener("mousemove",movePicture);
+        }
+        function removeCanvasEventListener(){
+            canvas.removeEventListener("mousedown",pickupPicture);
+            canvas.removeEventListener("mouseup",dropPicture);
+            canvas.removeEventListener("mousemove",movePicture);
         }
 
+        // 이벤트 핸들러
+        function pickupPicture(event){
+            isMouseDown = true;
+            for(let i = 0; i<25; i++){
+                if(event.x - canvas.offsetLeft > puzzles[i].dx && event.x-canvas.offsetLeft < puzzles[i].dx + 100 && event.y - canvas.offsetTop > puzzles[i].dy && event.y - canvas.offsetTop < puzzles[i].dy + 100){
+                    if(puzzles[i].position != null){
+                        choicePicture = puzzles[i];
+                    }
+                }
+            }
+        }
+
+        async function dropPicture(event){
+            isMouseDown = false;            
+            if(choicePicture){
+                let pictureIndex = puzzles.indexOf(choicePicture);
+                if(event.x - canvas.offsetLeft > pictureCurrentPosition[pictureIndex][0] && event.x - canvas.offsetLeft < pictureCurrentPosition[pictureIndex][0] + 100 && event.y - canvas.offsetTop > pictureCurrentPosition[pictureIndex][1] && event.y - canvas.offsetTop < pictureCurrentPosition[pictureIndex][1] + 100){
+                    rightNum += 1;
+                    if(rightNum == 24){
+                        // 게임 종료
+                        endGame();
+                    }
+                    choicePicture.dx =  pictureCurrentPosition[pictureIndex][0];
+                    choicePicture.dy = pictureCurrentPosition[pictureIndex][1];
+                    choicePicture.position = null;
+                    draw();
+                }else{
+                    effectMusic.src = "../audio/MP_간결한 메시지 도착.mp3";
+                    effectMusic.play();
+                    removeCanvasEventListener();
+                    choicePicture.dx = pictureStartPosition[choicePicture.position][0];
+                    choicePicture.dy = pictureStartPosition[choicePicture.position][1];                                            
+                    for( let i = 3; i>0;i--){
+                        draw();
+                        drawText(i,"300px Arial");                        
+                        await delayTime(1000);
+                    }
+                    draw();
+                    addCanvasEventListener();
+                }
+            }
+                choicePicture = null;
+                previousX,previousY = null;
+        }
+
+        function movePicture(event){
+            // 좌표 셋팅
+            let moveX = 0;
+            let moveY = 0;
+            if(isMouseDown && choicePicture){
+                if(previousX !== null && previousY !== null){
+                    moveX = event.x - previousX;
+                    moveY = event.y - previousY;
+                    previousX = event.x;
+                    previousY = event.y;
+                }else{
+                    previousX = event.x;
+                    previousY = event.y;
+                }
+                choicePicture.dx += moveX;
+                choicePicture.dy += moveY;
+                draw();
+            }
+        }
+
+        function start(){
+            // 초기 위치 설정
+            setCrruentPosition();
+            setStartPosition();
+            setPuzzleGamePosition();
+            splitImageIntoGrid();
+            addCanvasEventListener();
+            backgroudMusic.play();
+            // 초반에 그려주기
+            countDown().then(()=>{
+                ctx.clearRect(0,0,canvas.width,canvas.height);
+                timeOut();
+                setPictureIntoSide();
+                drawGrid();        
+            });
+        }
+
+        function endGame(state){
+            removeCanvasEventListener();
+            rightNum = 0;
+            pictureCurrentPosition = [];
+            puzzles = []
+            pictureStartPosition = [];
+            puzzleGamePosition = []
+            backgroudMusic.pause();
+            if(state){
+                drawText("Complete","100px Arial");
+            }else{
+                drawText("GAME OVER","100px Arial");
+            }
+        }
+
+        function delayTime(time){
+            return new Promise((resolve) => {
+                setTimeout(resolve, time);
+            });
+        }
+        function timeOut(){
+            let endtime = 300;
+            document.getElementById("time").textContent = "남은시간 : " + endtime;
+            let timeout = setInterval(function(){
+                endtime -=1;
+                document.getElementById("time").textContent = "남은시간 : " + endtime;
+            },1000);
+            setTimeout(function(){
+                clearInterval(timeOut);
+                endGame();
+            },300000)
+        }
+
+        function draw(){
+            ctx.clearRect(0,0,canvas.width,canvas.height);
+                for(let i =0; i<25;i++){
+                    ctx.drawImage(image,puzzles[i].sx,puzzles[i].sy,sw,sh,puzzles[i].dx,puzzles[i].dy,dw,dh);
+                }
+                drawGrid();
+        }
 
     // 이미지를 5x5 그리드로 분할하여 각각의 Canvas에 표시
-    function splitImageIntoGrid(img) {
+    function splitImageIntoGrid() {
         sw = image.width / 5
         sh = image.height / 5
+        let i = 0;
         // 이미지를 분할하여 각 Canvas에 표시
         for (let row = 0; row < 5; row++) {
             // console.log(1)
@@ -49,58 +224,93 @@
                 const sy = row * sh;
                 puzzles.push({
                     sx : col * sw,
-                    sy : row * sh
+                    sy : row * sh,
+                    dx : pictureCurrentPosition[i][0],
+                    dy : pictureCurrentPosition[i][1],
+                    position : null
                 });                
+                i++;
             }
         }
-        // 초반에 그려주기
-        var i =0;
-        for (var row = 0; row < 5; row++) {
-            for(var col = 0; col < 5; col++){
-                ctx.drawImage(img, puzzles[i].sx, puzzles[i].sy, sw, sh, pictureCurrentPosition[i][0],pictureCurrentPosition[i][1], dw, dh);
-                i++;                
-            }         
-            }
-        start()
+    }    
+    function setPictureIntoSide(){
+        console.log(1);
+        for(let position of puzzleGamePosition){
+            let index = puzzleGamePosition.indexOf(position);
+            puzzles[position].dx = pictureStartPosition[index][0];
+            puzzles[position].dy = pictureStartPosition[index][1];
+            puzzles[position].position = index;
+        }
+        for(let i = 0; i<25; i++){
+            ctx.drawImage(image,puzzles[i].sx,puzzles[i].sy,sw,sh,puzzles[i].dx,puzzles[i].dy,dw,dh);
+        }
     }
 
-    // 옆 공간에 배치 하기
-    // function puzzlePositioning(){
-    //     for(var i =0; i< 25; i++){
+    // 초기에 정답 화면 3초 동안 보여주기
+    function countDown(){
+        return new Promise((resolve,reject) =>{
+            let time = 3;
+            ctx.drawImage(image, 0, 0, image.width, image.height, 0,0, 700, 700);
+            drawText(time,"300px Arial");
+            let intervalID = setInterval(function(){
+                time -=1;
+                ctx.clearRect(0,0,canvas.width,canvas.height);
+                ctx.drawImage(image, 0, 0, image.width, image.height, 0,0, 700, 700);
+                drawText(time,"300px Arial");
+            },1000)
+            setTimeout(function(){
+                clearInterval(intervalID);
+                resolve();
+            },3000)
+        })
+    }
 
-    //     }
-    // }
-
+    // 초기 위치 설정
     function setStartPosition(){
-        for(var i = 0; i<8; i++){
-            pictureStartPosition.push([180*i,0]);
+        for(let i = 0; i<7; i++){
+            pictureStartPosition.push([100*i,0]);
         }
-        for(var i = 1; i<8; i++){
-            pictureStartPosition.push([1260,180*i]);
+        for(let i = 1; i<7; i++){
+            pictureStartPosition.push([600,100*i]);
         }
-        for(var i = 0; i<7; i++){
-            pictureStartPosition.push([180*i,1260]);
+        for(let i = 0; i<6; i++){
+            pictureStartPosition.push([100*i,600]);
         }
-        for(var i = 1; i<6; i++){
-            pictureStartPosition.push([0,180*i]);
+        for(let i = 1; i<6; i++){
+            pictureStartPosition.push([0,100*i]);
         }
-        console.log(pictureStartPosition);
-    }
-
-    function start(){
-        drawGrid();        
-        setStartPosition();
     }
 
     // 퍼즐 격판 그리기
-    function drawGrid(){
-        for(var i = 1; i<7; i++){
-            ctx.moveTo(180,180*i);
-            ctx.lineTo(1080,180*i);
-            ctx.moveTo(180*i,180);
-            ctx.lineTo(180*i,1080);
+    function drawGrid(){        
+        for(let i = 1; i<7; i++){
+            ctx.moveTo(100,100*i);
+            ctx.lineTo(700,100*i);
+            ctx.moveTo(100*i,100);
+            ctx.lineTo(100*i,700);
         }
         ctx.stroke();
+    }
+    // 중복 없는 숫자 뽑기
+    function setPuzzleGamePosition(){
+        while(puzzleGamePosition.length < 24){
+            let rndNum = Math.floor(Math.random()*25);
+            if(puzzleGamePosition.indexOf(rndNum) === -1){
+                puzzleGamePosition.push(rndNum);
+            }
+        }
+    }
+    function drawText(text, font){
+        ctx.font = font;
+        ctx.fillStyle = "gray";
+        ctx.fillText(text,280,450);
+    }
+    function setCrruentPosition(){
+        for(let i = 1; i<6;i++){
+            for(let j = 1; j<6; j++){
+                pictureCurrentPosition.push([100*j,100*i])
+            }
+        }
     }
     </script>
 </body>
