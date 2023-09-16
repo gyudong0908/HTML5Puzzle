@@ -117,14 +117,14 @@
                     rightNum += 1;
                     effectMusic.src = "../audio/MP_스테이지 클리어 (레트로).mp3";
                     effectMusic.play();
-                    if(rightNum == 24){
-                        // 게임 종료
-                        endGame();
-                    }
                     choicePicture.dx =  pictureCorrectPosition[pictureIndex][0];
                     choicePicture.dy = pictureCorrectPosition[pictureIndex][1];
                     choicePicture.position = null;
                     draw();
+                    if(rightNum == 24){
+                        // 게임 종료
+                        endGame(true);
+                    }
                 }else{
                     effectMusic.src = "../audio/MP_간결한 메시지 도착.mp3";
                     effectMusic.play();
@@ -191,7 +191,8 @@
             removeCanvasEventListener();
             backgroudMusic.pause();
             clearInterval(timeout);
-            if(state){
+            
+            if(state){  
                 drawText("Complete","100px Arial");
             }else{
                 drawText("GAME OVER","100px Arial");
@@ -212,7 +213,7 @@
             },1000);
             setTimeout(function(){
                 clearInterval(timeOut);
-                endGame();
+                endGame(false);
             },300000)
         }
 
@@ -244,8 +245,8 @@
                 i++;
             }
         }
-        console.log(puzzles)
-    }    
+    }
+
     function setPictureIntoSide(){
         console.log(1);
         for(let position of puzzleGamePosition){
