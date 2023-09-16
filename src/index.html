@@ -4,22 +4,31 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>퍼즐 게임</title>
+    <style>
+        body{
+            background-image: url('../background_image/신세천_풍경.png');
+            background-size: cover;
+            background-color: rgba(255, 174, 201, 0.3); /* 배경 색상에 투명도 추가 (50% 투명도) */
+            background-blend-mode: overlay; /* 배경 이미지와 배경 색상을 혼합하는 모드 설정 */
+        }
+    </style>
 </head>
 <body>
     <audio id = "backgroundMusic" src = "../audio/WhiteChristmas.mp3"></audio>
     <audio id = "effectMusic"></audio>
-    <div style="text-align: center; ">
-        <div>        
-            <label for = "difficulty">난이도</label>
-            <select name="difficulty" id="difficulty">
+    <div class="main"  style="text-align: center;">
+        <h1 style="margin-top: 0;">Puzzle Game</h1>
+        <div style="display: flex; justify-content: center; margin-bottom: 10px;">        
+            <label for = "difficulty" style="margin-right: 10px;">난이도</label>
+            <select name="difficulty" id="difficulty" style="margin-right: 10px;">
                 <option value="nomal">nomal</option>
                 <option value="hard">hard</option>
                 <option value="veryhard">veryhard</option>
             </select>
-            <label for="volumeControl">음량 조절</label>
-            <input type="range" id = "volumeControl" onchange="changeVolume()"  min="0" max="1" step="0.01">
-            <button id = "btnstart">start</button>       
-            <button id="hint" disabled = "true">힌트</button>     
+            <label for="volumeControl" style="margin-right: 10px;">음량 조절</label>
+            <input type="range" id = "volumeControl" onchange="changeVolume()"  min="0" max="1" step="0.01" style="margin-right: 10px;">
+            <button id = "btnstart" style="width: 50px; margin-right: 10px;">start</button>       
+            <button id="hint" disabled = "true" style="margin-right: 10px;">힌트</button>     
         </div>
         <canvas id = "mycanvas" width="700" height="700" style="border: 2px solid black;"></canvas>
         <div id="time" style="font-size: 30pt; font-weight: bold;"></div>
