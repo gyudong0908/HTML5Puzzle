@@ -30,12 +30,20 @@ const backgroudMusic = document.getElementById("backgroundMusic");
 const effectMusic = document.getElementById("effectMusic");
 // 힌트 버튼 element
 const btnHint = document.getElementById("hint");
+// item 버튼 element
+const item = document.getElementById("item");
 // 게임 플레이 시간 interval객체
 let playtime;
+// 남은 게임 시간
+let endTime;
+// 틀린 횟수
+let errorCount;
 
 // 이벤트 리스너
 
 document.getElementById("btnstart").addEventListener('click',startGame);
+document.onload = showRank();
+document.getElementById('difficulty').addEventListener('change',showRank);
 btnHint.addEventListener('click',function(){
     showAnswer(3);
 });
@@ -90,10 +98,11 @@ async function mouseUpHandler(event){
             effectMusic.src = "../audio/MP_간결한 메시지 도착.mp3";
             effectMusic.play();
             choicePicture.dx = ic.pictureStartPosition[choicePicture.position][0];
-            choicePicture.dy = ic.pictureStartPosition[choicePicture.position][1];                                            
+            choicePicture.dy = ic.pictureStartPosition[choicePicture.position][1];      
+            errorCount +=1;                                      
             for( let i = 3; i>0;i--){
                 draw();
-                drawText(i,"300px Arial");                        
+                drawText(i,"300px Arial",280,450);                        
                 await delayTime(1000);
             }
             draw();
@@ -138,11 +147,14 @@ function startGame(){
     // 초기 설정
     ic =  new ImageControl(image);
     rightNum = 0;
+    errorCount= 0;
+    showRank();
     clearInterval(playtime);
     addCanvasEventListener();
     backgroudMusic.play();
-    showAnswer(3);
-    playTime();
+    showAnswer(3).then(()=>{
+        playTime();
+    });
     }
 }
 
@@ -150,12 +162,19 @@ function startGame(){
 function endGame(state){
     removeCanvasEventListener();
     backgroudMusic.pause();
-    clearInterval(playtime);            
-    if(state){  
-        drawText("Complete","100px Arial");
-    }else{
-        drawText("GAME OVER","100px Arial");
+    clearInterval(playtime);
+    // 게임 정보 저장
+    if(sessionStorage.getItem(endtime + "_" + document.getElementById("difficulty").value) !==null && sessionStorage.getItem(endtime) < errorCount){}
+    else{
+        sessionStorage.setItem(endtime + "_" + document.getElementById("difficulty").value,errorCount);          
     }
+
+    if(state){  
+        drawText("Complete","100px Arial",150,350);
+    }else{
+        drawText("GAME OVER","100px Arial",50,350);
+    }
+    showRank();
 }
 
 // 랜덤으로 image 뽑기
@@ -192,7 +211,7 @@ function delayTime(time){
 
 // 게임 플레이 시간
 function playTime(){
-    let endtime = 300;
+    endtime = 300;
     document.getElementById("time").textContent = "남은시간 : " + endtime;
     playtime = setInterval(function(){
         endtime -=1;
@@ -209,10 +228,42 @@ async function showAnswer(time){
     for(let i = time; i>0; i--){
         ctx.clearRect(0,0,canvas.width,canvas.height);
         ctx.drawImage(image, 0, 0, image.width, image.height, 0,0, canvas.width, canvas.height);
-        drawText(i,"300px Arial");    
+        drawText(i,"300px Arial",280,450);    
         await delayTime(1000);
     }
     draw()
+}
+
+// 순위 정보 출력
+function showRank(){
+    document.getElementById("rankTable").innerHTML = ""
+    document.getElementById("rankTable").innerHTML = `                    
+    <h2>Rank</h2>
+    <tr>
+        <th>순위</th>
+        <th>남은시간</th>
+        <th>틀린횟수</th>
+    </tr>`
+    let rankList = [];
+    for(let i=0; i<sessionStorage.length;i++){
+         let key = sessionStorage.key(i);         
+         let value = sessionStorage.getItem(key);
+         let keyarr = key.split("_");
+         if(keyarr[1] == document.getElementById("difficulty").value){
+            rankList.push([keyarr[0],value]);
+         }
+    }
+    rankList.sort(function(a,b){
+        return  b[0] - a[0];
+    });
+    for(let i = 0; i<10 && i<rankList.length; i++){
+        document.getElementById("rankTable").innerHTML += `                    
+            <tr>
+                <th>${i+1}</th>
+                <th>${rankList[i][0]}</th>
+                <th>${rankList[i][1]}</th>
+            </tr>`
+    }    
 }
 
 // canvas 그리는 함수
@@ -238,8 +289,8 @@ ctx.stroke();
 }
 
 // 글 입력 하기
-function drawText(text, font){
+function drawText(text, font,x,y){
 ctx.font = font;
 ctx.fillStyle = "gray";
-ctx.fillText(text,280,450);
+ctx.fillText(text,x,y);
 }
