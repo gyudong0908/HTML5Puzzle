@@ -163,13 +163,16 @@ function getImage(difficulty){
     let imageIndex = Math.floor(Math.random() * 2);
     switch(difficulty){
         case "nomal":
-            image.src = nomalImagePath[imageIndex];  
+            image.src = nomalImagePath[imageIndex];
+            backgroudMusic.src = "../audio/WhiteChristmas.mp3";
             break;
         case "hard":
             image.src = hardImagePath[imageIndex];
+            backgroudMusic.src = "../audio/eco-technology-145636.mp3";
             break;
         case "veryhard":
             image.src = veryhardImagePath[imageIndex];
+            backgroudMusic.src = "../audio/veryhardBackground.mp3";
             break;
     }
 }
