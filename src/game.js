@@ -8,9 +8,9 @@ ctx.lineWidth = 5;
 //이미지
 let image = new Image();
 // 이미지 저장 경로
-let nomalImagePath = ["../image_nomal/잠만보.jpg","../image_nomal/피크닉.jpg"];
-let hardImagePath = ["../image_hard/벛꽃.jpg","../image_hard/비.jpg"];
-let veryhardImagePath = ["../image_veryhard/바다.jpg","../image_veryhard/우주.jpg"];
+let nomalImagePath = ["../image_nomal/잠만보.jpg","../image_nomal/피크닉.jpg","../image_nomal/곰.jpg","../image_nomal/니모.jpg","../image_nomal/여우.jpg"];
+let hardImagePath = ["../image_hard/벛꽃.jpg","../image_hard/비.jpg","../image_hard/피사의사탑.jpg","../image_hard/구름.jpg","../image_hard/경치.jpg"];
+let veryhardImagePath = ["../image_veryhard/바다.jpg","../image_veryhard/우주.jpg","../image_veryhard/야자수.jpg","../image_veryhard/달.jpg","../image_veryhard/등.jpg"];
 
 // imageControl객체 및 canvas에 그려질 넓이 변수
 let ic;
@@ -38,6 +38,8 @@ let playtime;
 let endTime;
 // 틀린 횟수
 let errorCount;
+// 이전 퍼즐 이미지
+let previousImage = null;
 
 // 이벤트 리스너
 
@@ -163,14 +165,13 @@ function endGame(state){
     removeCanvasEventListener();
     backgroudMusic.pause();
     clearInterval(playtime);
-    // 게임 정보 저장
-    if(sessionStorage.getItem(endtime + "_" + document.getElementById("difficulty").value) !==null && sessionStorage.getItem(endtime) < errorCount){}
-    else{
-        sessionStorage.setItem(endtime + "_" + document.getElementById("difficulty").value,errorCount);          
-    }
-
     if(state){  
         drawText("Complete","100px Arial",150,350);
+        // 게임 정보 저장
+        if(sessionStorage.getItem(endtime + "_" + document.getElementById("difficulty").value) !==null && sessionStorage.getItem(endtime) < errorCount){}
+        else{
+            sessionStorage.setItem(endtime + "_" + document.getElementById("difficulty").value,errorCount);          
+        }
     }else{
         drawText("GAME OVER","100px Arial",50,350);
     }
@@ -178,18 +179,33 @@ function endGame(state){
 }
 
 // 랜덤으로 image 뽑기
-function getImage(difficulty){            
-    let imageIndex = Math.floor(Math.random() * 2);
+function getImage(difficulty){  
+    let imageIndex;          
     switch(difficulty){
         case "nomal":
+            imageIndex = Math.floor(Math.random() * nomalImagePath.length);
+            while(previousImage === nomalImagePath[imageIndex]){
+                imageIndex = Math.floor(Math.random() * nomalImagePath.length);
+            }
+            previousImage = nomalImagePath[imageIndex];
             image.src = nomalImagePath[imageIndex];
             backgroudMusic.src = "../audio/WhiteChristmas.mp3";
             break;
         case "hard":
+            imageIndex = Math.floor(Math.random() * hardImagePath.length);
+            while(previousImage === hardImagePath[imageIndex]){
+                imageIndex = Math.floor(Math.random() * hardImagePath.length);
+            }
+            previousImage = hardImagePath[imageIndex];
             image.src = hardImagePath[imageIndex];
             backgroudMusic.src = "../audio/eco-technology-145636.mp3";
             break;
         case "veryhard":
+            imageIndex = Math.floor(Math.random() * veryhardImagePath.length);
+            while(previousImage === veryhardImagePath[imageIndex]){
+                imageIndex = Math.floor(Math.random() * veryhardImagePath.length);
+            }
+            previousImage = veryhardImagePath[imageIndex];
             image.src = veryhardImagePath[imageIndex];
             backgroudMusic.src = "../audio/veryhardBackground.mp3";
             break;
