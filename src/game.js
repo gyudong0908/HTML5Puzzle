@@ -13,9 +13,11 @@ let hardImagePath = ["../image_hard/벛꽃.jpg","../image_hard/비.jpg","../imag
 let veryhardImagePath = ["../image_veryhard/바다.jpg","../image_veryhard/우주.jpg","../image_veryhard/야자수.jpg","../image_veryhard/달.jpg","../image_veryhard/등.jpg"];
 
 // imageControl객체 및 canvas에 그려질 넓이 변수
-let ic;
+let im;
 let dw = 100;
 let dh = 100;
+// canvasDraw객체
+let cd;
 
 // 선택한 그림
 let choicePicture;
@@ -40,6 +42,8 @@ let endTime;
 let errorCount;
 // 이전 퍼즐 이미지
 let previousImage = null;
+
+let limitFrame = 0;
 
 // 이벤트 리스너
 
@@ -67,9 +71,9 @@ function mouseDownHandler(event){
     let mouseX = event.x - canvas.offsetLeft;
     let mouseY = event.y - canvas.offsetTop;
     for(let i = 0; i<25; i++){
-        if(mouseX > ic.puzzles[i].dx && mouseX < ic.puzzles[i].dx + dw && mouseY > ic.puzzles[i].dy && mouseY < ic.puzzles[i].dy + dh){
-            if(ic.puzzles[i].position != null){
-                choicePicture = ic.puzzles[i];
+        if(mouseX > im.puzzles[i].dx && mouseX < im.puzzles[i].dx + dw && mouseY > im.puzzles[i].dy && mouseY < im.puzzles[i].dy + dh){
+            if(im.puzzles[i].position != null){
+                choicePicture = im.puzzles[i];
             }
         }
     }
@@ -80,16 +84,16 @@ async function mouseUpHandler(event){
     let mouseX = event.x - canvas.offsetLeft;
     let mouseY = event.y - canvas.offsetTop;
     if(choicePicture){
-        let pictureIndex = ic.puzzles.indexOf(choicePicture);
+        let pictureIndex = im.puzzles.indexOf(choicePicture);
         // 맞는 위치에 놓았을 때
-        if(mouseX > ic.pictureCorrectPosition[pictureIndex][0] && mouseX < ic.pictureCorrectPosition[pictureIndex][0] + dw && mouseY > ic.pictureCorrectPosition[pictureIndex][1] && mouseY < ic.pictureCorrectPosition[pictureIndex][1] + dh){
+        if(mouseX > im.pictureCorrectPosition[pictureIndex][0] && mouseX < im.pictureCorrectPosition[pictureIndex][0] + dw && mouseY > im.pictureCorrectPosition[pictureIndex][1] && mouseY < im.pictureCorrectPosition[pictureIndex][1] + dh){
             rightNum += 1;
             effectMusic.src = "../audio/MP_스테이지 클리어 (레트로).mp3";
             effectMusic.play();
-            choicePicture.dx =  ic.pictureCorrectPosition[pictureIndex][0];
-            choicePicture.dy = ic.pictureCorrectPosition[pictureIndex][1];
+            choicePicture.dx =  im.pictureCorrectPosition[pictureIndex][0];
+            choicePicture.dy = im.pictureCorrectPosition[pictureIndex][1];
             choicePicture.position = null;
-            draw();
+            cd.draw();
             if(rightNum == 24){
                 // 게임 종료
                 endGame(true);
@@ -99,15 +103,15 @@ async function mouseUpHandler(event){
         else{
             effectMusic.src = "../audio/MP_간결한 메시지 도착.mp3";
             effectMusic.play();
-            choicePicture.dx = ic.pictureStartPosition[choicePicture.position][0];
-            choicePicture.dy = ic.pictureStartPosition[choicePicture.position][1];      
+            choicePicture.dx = im.pictureStartPosition[choicePicture.position][0];
+            choicePicture.dy = im.pictureStartPosition[choicePicture.position][1];      
             errorCount +=1;                                      
             for( let i = 3; i>0;i--){
-                draw();
-                drawText(i,"300px Arial",280,450);                        
+                cd.draw();
+                cd.drawText(i,"300px Arial",280,450);                        
                 await delayTime(1000);
             }
-            draw();
+            cd.draw();
         }
     }
         choicePicture = null;
@@ -117,20 +121,21 @@ async function mouseUpHandler(event){
 function mouseMoveHandler(event){
     let moveX = 0;
     let moveY = 0;
-    if(isMouseDown && choicePicture){
-        if(previousX !== null && previousY !== null){
-            moveX = event.x - previousX;
-            moveY = event.y - previousY;
-            previousX = event.x;
-            previousY = event.y;
-        }else{
-            previousX = event.x;
-            previousY = event.y;
+    console.log(1);
+        if(isMouseDown && choicePicture){
+            if(previousX !== null && previousY !== null){
+                moveX = event.x - previousX;
+                moveY = event.y - previousY;
+                previousX = event.x;
+                previousY = event.y;
+            }else{
+                previousX = event.x;
+                previousY = event.y;
+            }
+            choicePicture.dx += moveX;
+            choicePicture.dy += moveY;
+            cd.draw();
         }
-        choicePicture.dx += moveX;
-        choicePicture.dy += moveY;
-        draw();
-    }
 }
 // 볼륨 설정
 function changeVolume(){
@@ -147,7 +152,8 @@ function startGame(){
     btnHint.disabled = false;
     image.onload = function(){
     // 초기 설정
-    ic =  new ImageControl(image);
+    im =  new ImageInit(image);
+    cd = new CanvasDraw(image,ctx,im,dw,dh);
     rightNum = 0;
     errorCount= 0;
     showRank();
@@ -166,14 +172,14 @@ function endGame(state){
     backgroudMusic.pause();
     clearInterval(playtime);
     if(state){  
-        drawText("Complete","100px Arial",150,350);
+        cd.drawText("Complete","100px Arial",150,350);
         // 게임 정보 저장
         if(sessionStorage.getItem(endtime + "_" + document.getElementById("difficulty").value) !==null && sessionStorage.getItem(endtime) < errorCount){}
         else{
             sessionStorage.setItem(endtime + "_" + document.getElementById("difficulty").value,errorCount);          
         }
     }else{
-        drawText("GAME OVER","100px Arial",50,350);
+        cd.drawText("GAME OVER","100px Arial",50,350);
     }
     showRank();
 }
@@ -244,10 +250,10 @@ async function showAnswer(time){
     for(let i = time; i>0; i--){
         ctx.clearRect(0,0,canvas.width,canvas.height);
         ctx.drawImage(image, 0, 0, image.width, image.height, 0,0, canvas.width, canvas.height);
-        drawText(i,"300px Arial",280,450);    
+        cd.drawText(i,"300px Arial",280,450);    
         await delayTime(1000);
     }
-    draw()
+    cd.draw()
 }
 
 // 순위 정보 출력
@@ -280,33 +286,4 @@ function showRank(){
                 <th>${rankList[i][1]}</th>
             </tr>`
     }    
-}
-
-// canvas 그리는 함수
-
-// 화면 그리기
-function draw(){
-    ctx.clearRect(0,0,canvas.width,canvas.height);
-        for(let i =0; i<25;i++){
-            ctx.drawImage(image,ic.puzzles[i].sx,ic.puzzles[i].sy,ic.sw,ic.sh,ic.puzzles[i].dx,ic.puzzles[i].dy,dw,dh);
-        }
-        drawGrid();
-}
-
-// 퍼즐 격판 그리기
-function drawGrid(){        
-for(let i = 1; i<7; i++){
-    ctx.moveTo(dw,dh*i);
-    ctx.lineTo(dw*6,dh*i);
-    ctx.moveTo(dw*i,dh);
-    ctx.lineTo(dw*i,dh*6);
-}
-ctx.stroke();
-}
-
-// 글 입력 하기
-function drawText(text, font,x,y){
-ctx.font = font;
-ctx.fillStyle = "gray";
-ctx.fillText(text,x,y);
 }

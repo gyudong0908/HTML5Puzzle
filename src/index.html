@@ -12,7 +12,7 @@
     </style>
 </head>
 <body>
-    <audio id = "backgroundMusic"></audio>
+    <audio id = "backgroundMusic" loop></audio>
     <audio id = "effectMusic"></audio>
     <div class="main"  style="text-align: center;">
         <h1 style="margin-top: 0;">Puzzle Game</h1>
@@ -36,8 +36,9 @@
         </div>
         <div id="time" style="font-size: 30pt; font-weight: bold;"></div>
     </div>
-    <script src="ImageControl.js"></script>
+    <script src="imageInit.js"></script>
     <script src="game.js"></script>
+    <script src="canvasDraw.js"></script>
     <script>
         document.getElementById("div-rank").style.left = (document.getElementById("mycanvas").offsetLeft + document.getElementById("mycanvas").offsetWidth + 30) + "px";
         window.addEventListener("resize",function(){

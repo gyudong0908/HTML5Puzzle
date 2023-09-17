@@ -1,4 +1,4 @@
-class ImageControl{
+class ImageInit{
     image;
     sw;
     sh;
