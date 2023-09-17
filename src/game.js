@@ -5,45 +5,38 @@ let canvas = document.getElementById("mycanvas");
 let ctx = canvas.getContext('2d');
 ctx.lineWidth = 5;
 
-//이미지
-let image = new Image();
 // 이미지 저장 경로
 let nomalImagePath = ["../image_nomal/잠만보.jpg","../image_nomal/피크닉.jpg","../image_nomal/곰.jpg","../image_nomal/니모.jpg","../image_nomal/여우.jpg"];
 let hardImagePath = ["../image_hard/벛꽃.jpg","../image_hard/비.jpg","../image_hard/피사의사탑.jpg","../image_hard/구름.jpg","../image_hard/경치.jpg"];
 let veryhardImagePath = ["../image_veryhard/바다.jpg","../image_veryhard/우주.jpg","../image_veryhard/야자수.jpg","../image_veryhard/달.jpg","../image_veryhard/등.jpg"];
 
-// imageControl객체 및 canvas에 그려질 넓이 변수
-let im;
+// canvas에 그려질 넓이 변수
 let dw = 100;
 let dh = 100;
-// canvasDraw객체
-let cd;
-
-// 선택한 그림
-let choicePicture;
-let isMouseDown = false;
-// 이전 x,y 좌표
-let previousX = null;
-let previousY = null;
-let rightNum = 0;
 
 // 음악 element
 const backgroudMusic = document.getElementById("backgroundMusic");
 const effectMusic = document.getElementById("effectMusic");
 // 힌트 버튼 element
 const btnHint = document.getElementById("hint");
-// item 버튼 element
-const item = document.getElementById("item");
+
 // 게임 플레이 시간 interval객체
 let playtime;
 // 남은 게임 시간
 let endTime;
-// 틀린 횟수
-let errorCount;
 // 이전 퍼즐 이미지
 let previousImage = null;
 
-let limitFrame = 0;
+// Handler 객체
+let handler;
+// imageInit 객체
+let im;
+// canvasDraw객체
+let cd;
+// 이미지 객체
+let image = new Image();
+
+
 
 // 이벤트 리스너
 
@@ -53,130 +46,47 @@ document.getElementById('difficulty').addEventListener('change',showRank);
 btnHint.addEventListener('click',function(){
     showAnswer(3);
 });
-function addCanvasEventListener(){
-    canvas.addEventListener("mousedown",mouseDownHandler);
-    canvas.addEventListener("mouseup",mouseUpHandler);
-    canvas.addEventListener("mousemove",mouseMoveHandler);
-}
-function removeCanvasEventListener(){
-    canvas.removeEventListener("mousedown",mouseDownHandler);
-    canvas.removeEventListener("mouseup",mouseUpHandler);
-    canvas.removeEventListener("mousemove",mouseMoveHandler);
-}
-
-// 이벤트 핸들러
-
-function mouseDownHandler(event){
-    isMouseDown = true;
-    let mouseX = event.x - canvas.offsetLeft;
-    let mouseY = event.y - canvas.offsetTop;
-    for(let i = 0; i<25; i++){
-        if(mouseX > im.puzzles[i].dx && mouseX < im.puzzles[i].dx + dw && mouseY > im.puzzles[i].dy && mouseY < im.puzzles[i].dy + dh){
-            if(im.puzzles[i].position != null){
-                choicePicture = im.puzzles[i];
-            }
-        }
-    }
-}
-
-async function mouseUpHandler(event){
-    isMouseDown = false;            
-    let mouseX = event.x - canvas.offsetLeft;
-    let mouseY = event.y - canvas.offsetTop;
-    if(choicePicture){
-        let pictureIndex = im.puzzles.indexOf(choicePicture);
-        // 맞는 위치에 놓았을 때
-        if(mouseX > im.pictureCorrectPosition[pictureIndex][0] && mouseX < im.pictureCorrectPosition[pictureIndex][0] + dw && mouseY > im.pictureCorrectPosition[pictureIndex][1] && mouseY < im.pictureCorrectPosition[pictureIndex][1] + dh){
-            rightNum += 1;
-            effectMusic.src = "../audio/MP_스테이지 클리어 (레트로).mp3";
-            effectMusic.play();
-            choicePicture.dx =  im.pictureCorrectPosition[pictureIndex][0];
-            choicePicture.dy = im.pictureCorrectPosition[pictureIndex][1];
-            choicePicture.position = null;
-            cd.draw();
-            if(rightNum == 24){
-                // 게임 종료
-                endGame(true);
-            }
-        }
-        // 틀린 위치에 두었을 때
-        else{
-            effectMusic.src = "../audio/MP_간결한 메시지 도착.mp3";
-            effectMusic.play();
-            choicePicture.dx = im.pictureStartPosition[choicePicture.position][0];
-            choicePicture.dy = im.pictureStartPosition[choicePicture.position][1];      
-            errorCount +=1;                                      
-            for( let i = 3; i>0;i--){
-                cd.draw();
-                cd.drawText(i,"300px Arial",280,450);                        
-                await delayTime(1000);
-            }
-            cd.draw();
-        }
-    }
-        choicePicture = null;
-        previousX,previousY = null;
-}
-
-function mouseMoveHandler(event){
-    let moveX = 0;
-    let moveY = 0;
-    console.log(1);
-        if(isMouseDown && choicePicture){
-            if(previousX !== null && previousY !== null){
-                moveX = event.x - previousX;
-                moveY = event.y - previousY;
-                previousX = event.x;
-                previousY = event.y;
-            }else{
-                previousX = event.x;
-                previousY = event.y;
-            }
-            choicePicture.dx += moveX;
-            choicePicture.dy += moveY;
-            cd.draw();
-        }
-}
 // 볼륨 설정
 function changeVolume(){
     const volumeControl = document.getElementById('volumeControl');
+    const backgroudMusic = document.getElementById("backgroundMusic");
+    const effectMusic = document.getElementById("effectMusic");
     backgroudMusic.volume = volumeControl.value;
     effectMusic.volume = volumeControl.value;
 }
-
-// 게임 관련 함수
 
 // 게임 시작
 function startGame(){
     getImage(document.getElementById("difficulty").value);
     btnHint.disabled = false;
+    document.getElementById("btnstart").disabled = true;
     image.onload = function(){
-    // 초기 설정
+    // 객체 가져오기
     im =  new ImageInit(image);
     cd = new CanvasDraw(image,ctx,im,dw,dh);
-    rightNum = 0;
-    errorCount= 0;
+    handler = new Handler(im,cd,endGame);    
     showRank();
     clearInterval(playtime);
-    addCanvasEventListener();
+    handler.addCanvasEventListener();
     backgroudMusic.play();
     showAnswer(3).then(()=>{
         playTime();
+        document.getElementById("btnstart").disabled = false;
     });
     }
 }
 
 // 게임 종료
 function endGame(state){
-    removeCanvasEventListener();
+    handler.removeCanvasEventListener();
     backgroudMusic.pause();
     clearInterval(playtime);
     if(state){  
         cd.drawText("Complete","100px Arial",150,350);
         // 게임 정보 저장
-        if(sessionStorage.getItem(endtime + "_" + document.getElementById("difficulty").value) !==null && sessionStorage.getItem(endtime) < errorCount){}
+        if(sessionStorage.getItem(endtime + "_" + document.getElementById("difficulty").value) !==null && sessionStorage.getItem(endtime) < handler.errorCount){}
         else{
-            sessionStorage.setItem(endtime + "_" + document.getElementById("difficulty").value,errorCount);          
+            sessionStorage.setItem(endtime + "_" + document.getElementById("difficulty").value,handler.errorCount);          
         }
     }else{
         cd.drawText("GAME OVER","100px Arial",50,350);
@@ -220,12 +130,14 @@ function getImage(difficulty){
 
 // 딜레이 함수
 function delayTime(time){
-    removeCanvasEventListener();
+    handler.removeCanvasEventListener();
     btnHint.disabled = true;
+    document.getElementById("btnstart").disabled = true;
     return new Promise((resolve) => {
         setTimeout(function(){
-            addCanvasEventListener();
+            handler.addCanvasEventListener();
             btnHint.disabled = false;
+            document.getElementById("btnstart").disabled = false;
             resolve();
         }, time);
     });

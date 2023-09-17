@@ -6,8 +6,8 @@
     <title>퍼즐 게임</title>
     <style>
         body{
-            background-image: url('../background_image/Autism-Puzzle-PNG-Isolated-Photo.png');
-            background-size:contain;
+            background-image: url('../background_image/jonny-gios-SqjhKY9877M-unsplash.jpg');
+            background-size:cover;
         }
     </style>
 </head>
@@ -31,7 +31,7 @@
         <div>
             <canvas id = "mycanvas" width="700" height="700" style="border: 2px solid black; background-color: white; z-index: 1;"></canvas>
             <div id = "div-rank" style="position:absolute; top: 100px;">
-                <table id="rankTable"></table>
+                <table id="rankTable" style="color: #FFFFFF;"></table>
             </div>
         </div>
         <div id="time" style="font-size: 30pt; font-weight: bold;"></div>
@@ -39,6 +39,7 @@
     <script src="imageInit.js"></script>
     <script src="game.js"></script>
     <script src="canvasDraw.js"></script>
+    <script src="handler.js"></script>
     <script>
         document.getElementById("div-rank").style.left = (document.getElementById("mycanvas").offsetLeft + document.getElementById("mycanvas").offsetWidth + 30) + "px";
         window.addEventListener("resize",function(){
