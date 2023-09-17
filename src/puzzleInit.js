@@ -1,4 +1,4 @@
-class ImageInit{
+class PuzzleInit{
     image;
     sw;
     sh;

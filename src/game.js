@@ -29,22 +29,22 @@ let previousImage = null;
 
 // Handler 객체
 let handler;
-// imageInit 객체
-let im;
-// canvasDraw객체
+// PuzzleInit 객체
+let pi;
+// CanvasDraw객체
 let cd;
 // 이미지 객체
 let image = new Image();
 
-
-
 // 이벤트 리스너
-
 document.getElementById("btnstart").addEventListener('click',startGame);
 document.onload = showRank();
 document.getElementById('difficulty').addEventListener('change',showRank);
 btnHint.addEventListener('click',function(){
-    showAnswer(3);
+    handler.removeCanvasEventListener();
+    showAnswer(3).then(()=>{
+        handler.addCanvasEventListener();
+    });
 });
 // 볼륨 설정
 function changeVolume(){
@@ -57,21 +57,23 @@ function changeVolume(){
 
 // 게임 시작
 function startGame(){
+    if(handler !== undefined) handler.removeCanvasEventListener(); 
+
     getImage(document.getElementById("difficulty").value);
     btnHint.disabled = false;
     document.getElementById("btnstart").disabled = true;
     image.onload = function(){
     // 객체 가져오기
-    im =  new ImageInit(image);
-    cd = new CanvasDraw(image,ctx,im,dw,dh);
-    handler = new Handler(im,cd,endGame);    
+    pi =  new PuzzleInit(image);
+    cd = new CanvasDraw(image,ctx,pi,dw,dh);
+    handler = new Handler(pi,cd,endGame);   
     showRank();
     clearInterval(playtime);
-    handler.addCanvasEventListener();
     backgroudMusic.play();
     showAnswer(3).then(()=>{
         playTime();
         document.getElementById("btnstart").disabled = false;
+        handler.addCanvasEventListener();
     });
     }
 }
@@ -130,12 +132,10 @@ function getImage(difficulty){
 
 // 딜레이 함수
 function delayTime(time){
-    handler.removeCanvasEventListener();
     btnHint.disabled = true;
     document.getElementById("btnstart").disabled = true;
     return new Promise((resolve) => {
         setTimeout(function(){
-            handler.addCanvasEventListener();
             btnHint.disabled = false;
             document.getElementById("btnstart").disabled = false;
             resolve();

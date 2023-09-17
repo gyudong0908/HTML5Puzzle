@@ -1,8 +1,8 @@
 class CanvasDraw{
-    constructor(image,ctx,im,dw,dh){        
+    constructor(image,ctx,pi,dw,dh){        
         this.image = image;
         this.ctx = ctx;
-        this.im = im;
+        this.pi = pi;
         this.dw = dw;
         this.dh = dh;
     }
@@ -11,7 +11,7 @@ class CanvasDraw{
     draw(){
         ctx.clearRect(0,0,canvas.width,canvas.height);
             for(let i =0; i<25;i++){
-                ctx.drawImage(image,im.puzzles[i].sx,im.puzzles[i].sy,im.sw,im.sh,im.puzzles[i].dx,im.puzzles[i].dy,dw,dh);
+                ctx.drawImage(image,pi.puzzles[i].sx,pi.puzzles[i].sy,pi.sw,pi.sh,pi.puzzles[i].dx,pi.puzzles[i].dy,dw,dh);
             }
         this.drawGrid();
     }
