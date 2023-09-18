@@ -1,3 +1,6 @@
+import PuzzleInit from "./puzzleInit.js";
+import Handler from "./handler.js";
+import CanvasDraw from "./canvasDraw.js";
 // 전역 변수
 
 // 캔버스 정보 가져오기
@@ -16,7 +19,6 @@ let dh = 100;
 
 // 음악 element
 const backgroudMusic = document.getElementById("backgroundMusic");
-const effectMusic = document.getElementById("effectMusic");
 // 힌트 버튼 element
 const btnHint = document.getElementById("hint");
 
@@ -46,14 +48,6 @@ btnHint.addEventListener('click',function(){
         handler.addCanvasEventListener();
     });
 });
-// 볼륨 설정
-function changeVolume(){
-    const volumeControl = document.getElementById('volumeControl');
-    const backgroudMusic = document.getElementById("backgroundMusic");
-    const effectMusic = document.getElementById("effectMusic");
-    backgroudMusic.volume = volumeControl.value;
-    effectMusic.volume = volumeControl.value;
-}
 
 // 게임 시작
 function startGame(){
@@ -65,8 +59,8 @@ function startGame(){
     image.onload = function(){
     // 객체 가져오기
     pi =  new PuzzleInit(image);
-    cd = new CanvasDraw(image,ctx,pi,dw,dh);
-    handler = new Handler(pi,cd,endGame);   
+    cd = new CanvasDraw(image,canvas,ctx,pi,dw,dh);
+    handler = new Handler(pi,cd,canvas,endGame,delayTime,dw,dh);   
     showRank();
     clearInterval(playtime);
     backgroudMusic.play();
@@ -86,9 +80,9 @@ function endGame(state){
     if(state){  
         cd.drawText("Complete","100px Arial",150,350);
         // 게임 정보 저장
-        if(sessionStorage.getItem(endtime + "_" + document.getElementById("difficulty").value) !==null && sessionStorage.getItem(endtime) < handler.errorCount){}
+        if(sessionStorage.getItem(endTime + "_" + document.getElementById("difficulty").value) !==null && sessionStorage.getItem(endTime) < handler.errorCount){}
         else{
-            sessionStorage.setItem(endtime + "_" + document.getElementById("difficulty").value,handler.errorCount);          
+            sessionStorage.setItem(endTime + "_" + document.getElementById("difficulty").value,handler.errorCount);          
         }
     }else{
         cd.drawText("GAME OVER","100px Arial",50,350);
@@ -145,11 +139,11 @@ function delayTime(time){
 
 // 게임 플레이 시간
 function playTime(){
-    endtime = 300;
-    document.getElementById("time").textContent = "남은시간 : " + endtime;
+    endTime = 300;
+    document.getElementById("time").textContent = "남은시간 : " + endTime;
     playtime = setInterval(function(){
-        endtime -=1;
-        document.getElementById("time").textContent = "남은시간 : " + endtime;
+        endTime -=1;
+        document.getElementById("time").textContent = "남은시간 : " + endTime;
     },1000);
     setTimeout(function(){
         clearInterval(playtime);

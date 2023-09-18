@@ -36,15 +36,20 @@
         </div>
         <div id="time" style="font-size: 30pt; font-weight: bold;"></div>
     </div>
-    <script src="puzzleInit.js"></script>
-    <script src="game.js"></script>
-    <script src="canvasDraw.js"></script>
-    <script src="handler.js"></script>
+    <script type="module" src="game.js"></script>
     <script>
         document.getElementById("div-rank").style.left = (document.getElementById("mycanvas").offsetLeft + document.getElementById("mycanvas").offsetWidth + 30) + "px";
         window.addEventListener("resize",function(){
             document.getElementById("div-rank").style.left = (document.getElementById("mycanvas").offsetLeft + document.getElementById("mycanvas").offsetWidth + 30) + "px";
         })
+        // 볼륨 설정
+        function changeVolume(){
+            const volumeControl = document.getElementById('volumeControl');
+            const backgroudMusic = document.getElementById("backgroundMusic");
+            const effectMusic = document.getElementById("effectMusic");
+            backgroudMusic.volume = volumeControl.value;
+            effectMusic.volume = volumeControl.value;
+        }
     </script>
 </body>
 </html>

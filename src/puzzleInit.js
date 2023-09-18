@@ -1,14 +1,11 @@
-class PuzzleInit{
-    image;
-    sw;
-    sh;
-    // 그림이 처음에 배치 될 위치들
-    pictureCorrectPosition = [];
-    puzzles = [];
-    pictureStartPosition = [];
-    
+class PuzzleInit{    
     constructor(image){
         this.image = image;
+        this.sw = this.image.width / 5
+        this.sh = this.image.height / 5
+        this.pictureCorrectPosition = [];
+        this.puzzles = [];
+        this.pictureStartPosition = [];
         this.setCrruentPosition();
         this.setStartPosition();
         this.splitImageIntoGrid();
@@ -74,6 +71,6 @@ class PuzzleInit{
             this.puzzles[position].dy = this.pictureStartPosition[index][1];
             this.puzzles[position].position = index;
         }
-    }
-        
+    }        
 }
+export default PuzzleInit;
