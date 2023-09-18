@@ -66,7 +66,6 @@ function startGame(){
     backgroudMusic.play();
     showAnswer(3).then(()=>{
         playTime();
-        document.getElementById("btnstart").disabled = false;
         handler.addCanvasEventListener();
     });
     }
@@ -126,12 +125,8 @@ function getImage(difficulty){
 
 // 딜레이 함수
 function delayTime(time){
-    btnHint.disabled = true;
-    document.getElementById("btnstart").disabled = true;
     return new Promise((resolve) => {
         setTimeout(function(){
-            btnHint.disabled = false;
-            document.getElementById("btnstart").disabled = false;
             resolve();
         }, time);
     });
@@ -153,12 +148,16 @@ function playTime(){
 
 // 정답 화면 3초 동안 보여주기
 async function showAnswer(time){
+    document.getElementById("btnstart").disabled = true;
+    btnHint.disabled = true;
     for(let i = time; i>0; i--){
         ctx.clearRect(0,0,canvas.width,canvas.height);
         ctx.drawImage(image, 0, 0, image.width, image.height, 0,0, canvas.width, canvas.height);
         cd.drawText(i,"300px Arial",280,450);    
         await delayTime(1000);
     }
+    document.getElementById("btnstart").disabled = false;
+    btnHint.disabled = false;
     cd.draw()
 }
 

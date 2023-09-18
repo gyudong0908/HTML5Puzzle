@@ -39,7 +39,23 @@ class Handler{
             }
         }
     }
-    
+        
+    mouseMoveHandler = (event) =>{
+        let moveX = 0;
+        let moveY = 0;
+            if(this.isMouseDown && this.choicePicture){
+                if(this.previousX !== null && this.previousY !== null){
+                    moveX = event.x - this.previousX;
+                    moveY = event.y - this.previousY;
+                    this.previousX = event.x;
+                    this.previousY = event.y;
+                }
+                this.choicePicture.dx += moveX;
+                this.choicePicture.dy += moveY;
+                this.cd.draw();
+            }
+    }
+
     mouseUpHandler = async (event) =>{
         this.isMouseDown = false;            
         let mouseX = event.x - this.canvas.offsetLeft;
@@ -79,22 +95,6 @@ class Handler{
         }
         this.choicePicture = null;
         this.previousX,this.previousY = null;
-    }
-    
-    mouseMoveHandler = (event) =>{
-        let moveX = 0;
-        let moveY = 0;
-            if(this.isMouseDown && this.choicePicture){
-                if(this.previousX !== null && this.previousY !== null){
-                    moveX = event.x - this.previousX;
-                    moveY = event.y - this.previousY;
-                    this.previousX = event.x;
-                    this.previousY = event.y;
-                }
-                this.choicePicture.dx += moveX;
-                this.choicePicture.dy += moveY;
-                this.cd.draw();
-            }
     }
 }
 export default Handler;
