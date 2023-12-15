@@ -1,6 +1,8 @@
 # HTML5Puzzle
 ## 소개
 HTML5의 캔버스를 활용한 퍼즐게임입니다.
+## 프로젝트 ppt
+[Uploading HTML5 웹.pdf…]()
 ## 게임 화면
 ![image](https://github.com/gyudong0908/HTML5Puzzle/assets/121427661/a91f0b5e-0b98-425f-a7b6-bdba5520d46a)
 ## 어려웠던 점
